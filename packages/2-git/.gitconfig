@@ -1,0 +1,9 @@
+[user]
+	name = udim
+	email = udim@chain-reaction.io
+[alias]
+	st = status
+    co = checkout
+    please = push --force-with-lease
+[commit]
+	template = /home/udim/.gitmessage.txt

@@ -1,0 +1,93 @@
+#!/usr/bin/python3
+
+import argparse
+import re
+import json
+import subprocess
+
+SUPPORTED_COMPILER = ["gcc", "g\+\+", "clang", "clang\+\+"]
+
+OUTPUT_FLAG_REGEX = re.compile("\s-o\s[^ ]*")
+LIB_FLAG_REGEX = re.compile("\s-l[^ ]*")
+LIB_DIR_FLAG_REGEX = re.compile("\s-L[^ ]*")
+C_FILES_REGEX = re.compile("([^ ]*\.c)\s")
+CPP_FILES_REGEX = re.compile("([^ ]*\.cpp)\s")
+COMPILER_REGEX = re.compile("^\s*([^ ]*)")
+
+class hashabledict(dict):
+    def __hash__(self):
+        return hash(tuple(sorted(self.items())))
+
+def get_flags(make_compile_command):
+    # Removes [-o, -l, -L] flags
+    reduced_compile_command = OUTPUT_FLAG_REGEX.sub("", make_compile_command)
+    reduced_compile_command = LIB_FLAG_REGEX.sub("", reduced_compile_command)
+    reduced_compile_command = LIB_DIR_FLAG_REGEX.sub("", reduced_compile_command)
+
+    # Removes sources
+    reduced_compile_command = C_FILES_REGEX.sub("", reduced_compile_command)
+    reduced_compile_command = CPP_FILES_REGEX.sub("", reduced_compile_command)
+
+    # Removes compiler
+    reduced_compile_command = COMPILER_REGEX.sub("", reduced_compile_command)
+
+    return reduced_compile_command.strip()
+
+def get_sources(make_compile_command):
+    c_files = C_FILES_REGEX.findall(make_compile_command)
+    cpp_files = CPP_FILES_REGEX.findall(make_compile_command)
+
+    return c_files + cpp_files
+
+def get_compiler(make_compile_command):
+    return COMPILER_REGEX.search(make_compile_command).group()
+
+def get_single_compile_command(build_dir, compiler, flags, source):
+    return hashabledict({
+        "directory": build_dir,
+        "command": f"{compiler} {flags} {source}",
+        "file": source
+    })
+
+def get_compile_commands(make_compile_command, build_dir):
+    flags = get_flags(make_compile_command)
+    sources = get_sources(make_compile_command)
+    compiler = get_compiler(make_compile_command)
+
+    return [get_single_compile_command(build_dir, compiler, flags, source) for source in sources]
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("build_command")
+    parser.add_argument("build_dir")
+    args = parser.parse_args()
+
+    return args.build_command, args.build_dir
+
+def get_make_compile_commands(build_cmd):
+    result = subprocess.run(build_cmd.split(), stdout=subprocess.PIPE)
+    output = result.stdout.decode()
+
+    make_complie_commands = set()
+
+    for compiler in SUPPORTED_COMPILER:
+        make_complie_commands.update(set(re.compile(f"^\s*({compiler}.*$)", re.MULTILINE).findall(output)))
+
+    return make_complie_commands
+
+def main():
+    build_cmd, build_dir = parse_args()
+
+
+    make_compile_commands = get_make_compile_commands(build_cmd)
+
+    compile_commands = set()
+
+    for make_compile_command in make_compile_commands:
+        compile_commands.update(set(get_compile_commands(make_compile_command, build_dir)))
+
+    with open("compile_commands.json", "w") as f:
+        f.write(json.dumps(list(compile_commands), sort_keys=True, indent=4))
+
+if __name__ == "__main__":
+    main()
