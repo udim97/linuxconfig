@@ -23,6 +23,28 @@ local debian = require("debian.menu")
 local has_fdo, freedesktop = pcall(require, "freedesktop")
 
 local volume_widget = require('awesome-wm-widgets.volume-widget.volume')
+local battery_widget = require("awesome-wm-widgets.battery-widget.battery")
+
+
+-- Keyboard map indicator and changer
+kbdcfg = {}
+kbdcfg.cmd = "setxkbmap"
+kbdcfg.layout = { { "us", "" }, { "il", "" } }
+kbdcfg.current = 1  -- us is our default layout
+kbdcfg.widget = wibox.widget({ type = "textbox", align = "right" })
+kbdcfg.widget.text = " " .. kbdcfg.layout[kbdcfg.current][1] .. " "
+kbdcfg.switch = function ()
+  kbdcfg.current = kbdcfg.current % #(kbdcfg.layout) + 1
+  local t = kbdcfg.layout[kbdcfg.current]
+  kbdcfg.widget.text = " " .. t[1] .. " "
+  os.execute( kbdcfg.cmd .. " " .. t[1] .. " " .. t[2] )
+end
+
+-- Mouse bindings
+kbdcfg.widget:buttons(awful.util.table.join(awful.button({ }, 1, function () kbdcfg.switch() end)))
+
+
+
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -236,6 +258,7 @@ awful.screen.connect_for_each_screen(function(s)
             s.mylayoutbox,
 
             volume_widget(),
+            battery_widget(),
             -- customized
             volume_widget{
               widget_type = 'arc'
@@ -329,6 +352,12 @@ globalkeys = gears.table.join(
       function ()
         mouse.coords ({x=0, y=0})
       end,
+      {description = "Zero mouse pos", group = "mouse"}),
+
+    awful.key({ modkey, "Shift"   }, "p",
+      function ()
+        awful.util.spawn_with_shell("gnome-screenshot -a")
+      end,
     {description = "Zero mouse pos", group = "mouse"}),
 
     awful.key({ modkey, "Control" }, "n",
@@ -363,7 +392,10 @@ globalkeys = gears.table.join(
 
     awful.key({ modkey }, "]", function() volume_widget:inc() end),
     awful.key({ modkey }, "[", function() volume_widget:dec() end),
-    awful.key({ modkey }, "\\", function() volume_widget:toggle() end)
+    awful.key({ modkey }, "\\", function() volume_widget:toggle() end),
+
+    -- User config
+    awful.key({ "Mod1" }, "Shift_L", function () kbdcfg.switch() end)
 )
 
 clientkeys = gears.table.join(
@@ -599,3 +631,5 @@ end)
 client.connect_signal("focus", function(c) c.border_color = "#ff0000"  end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 -- }}}
+
+awful.util.spawn_with_shell("nm-applet &")

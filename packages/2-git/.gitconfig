@@ -7,3 +7,5 @@
     please = push --force-with-lease
 [commit]
 	template = /home/udim/.gitmessage.txt
+[cola]
+	spellcheck = false

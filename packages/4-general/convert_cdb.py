@@ -22,10 +22,12 @@ def main():
         cdb_data = f.read()
 
     cdb_data = re.sub("/work", project_path, cdb_data)
-    cdb_data = re.sub("package/[^ ]*/cmake/src", "src", cdb_data)
-    cdb_data = re.sub("package/[^ ]*/target/src", "src", cdb_data)
-    cdb_data = re.sub("package/[^ ]*/cmake/tests", "tests", cdb_data)
-    cdb_data = re.sub("package/[^ ]*/target/tests", "tests", cdb_data)
+    cdb_data = re.sub("target/src", "src", cdb_data)
+    cdb_data = re.sub("target/x86_64/cmake/src", "src", cdb_data)
+    cdb_data = re.sub("target/tests", "tests", cdb_data)
+    cdb_data = re.sub("target/x86_64/cmake/tests", "tests", cdb_data)
+    cdb_data = re.sub("target/example", "example", cdb_data)
+    cdb_data = re.sub("target/x86_64/cmake/example", "example", cdb_data)
 
     with open(dst_cdb_path, "w") as f:
         f.write(cdb_data)
