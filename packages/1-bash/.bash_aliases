@@ -19,19 +19,22 @@ alias bb="/home/udim/projects/reactiongate/run-docker-compose.sh -st --skip-buil
 
 # Rtags
 alias rdmEmacs="rdm --error-limit 50000"
-alias cdb='create_cdb "./tools/build_tools/build.sh --dry-run" `pwd`/src && rc -J .'
+alias hr_cdb='convert_cdb `pwd` ~/projects/hermes/package/hermes/target/x86_64/cmake/compile_commands.json ~/projects/hermes/compile_commands.json'
+
 
 # Overrides
 alias vi="emacsclient -nw"
 alias rm="trash"
 
 # Anyconnect
-alias anyconnectvpn="/opt/cisco/anyconnect/bin/vpn -s < ~/.vpn-creds connect ra-vcadsv.cadence.com"
-alias anydisconnectvpn="/opt/cisco/anyconnect/bin/vpn disconnect ra-vcadsv.cadence.com"
-alias anyconnect="sshpass -p cadence ssh pi@172.29.149.99"
+alias openconnectvpn="sudo openconnect --passwd-on-stdin --non-inter --background ra-vcadsv.cadence.com < ~/.vpncreds"
+alias opendisconnectvpn="sudo kill $(pidof openconnect)"
+alias openconnect="sshpass -p cadence ssh pi@172.29.149.99"
 alias scp_rp="sshpass -p cadence scp /home/udim/projects/reactiongate/package/reactiongate/target/arm/reaction_gate pi@172.29.149.99:~/work/udim/rg"
 alias scp_hr="sshpass -p cadence scp /home/udim/projects/hermes/package/hermes/target/arm/tests pi@172.29.149.99:~/work/udim/hermes"
 
+# Etc
+alias cdtmp="cd `mktemp -d`"
 
 # Fucntions
 function findReplace()
