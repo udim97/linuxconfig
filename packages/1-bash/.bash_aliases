@@ -66,12 +66,16 @@ alias protium_f_deploy="./run-docker-compose.sh deploy -st -dd work/udim protium
 # fpga-62
 alias fpga_62_ssh="sshpass -p raspberry ssh -o \"ServerAliveInterval 60\" pi@10.100.10.62"
 
+# Connect remote
+alias connect_remote='sshpass -p Udi123\$5 ssh -X -o "ServerAliveInterval 60" 10.100.24.94'
+
 # Etc
 alias cdtmp="cd `mktemp -d`"
 alias utar="tar -zcvf"
 alias untar="tar -xzvf"
 alias tar_watch="tar -tvf"
 alias emacs="emacs -nw"
+alias headphones_connect="bluetoothctl connect 28:6F:40:8A:DD:08"
 
 # Fucntions
 function findReplace()
@@ -93,7 +97,7 @@ function findReplaceExact()
 function rsp_ssh ()
 {
     rsp_number=$1
-    sshpass -p raspberry ssh -o "ServerAliveInterval 60" pi@10.100.10.${rsp_number}
+    sshpass -p raspberry ssh -o "ServerAliveInterval 60" pi@10.100.10.${rsp_number} -t 'cd ~/work/udim; ps -fu $USER; bash --login'
 }
 
 function rsp_deploy ()

@@ -2,24 +2,17 @@
 
 import networkx as nx
 import matplotlib.pyplot as plt
-
-['. ./listeners/dispatcher.h',
- '.. ./listeners/service.h',
- '... ./message/message.h',
- '... ./utils/buffer_builder.h',
- '.... ./utils/buffer_builder.tpp',
- '..... ./logger.h',
- '... ./utils/buffer_consumer.h',
- '.... ./utils/buffer_consumer.tpp',
- '.. ./listeners/controller.h',
- '.. ./pipe/PriorityPipe.h',
- '. ./pipe/PipesManager.h',
+import sys
+from networkx.drawing.nx_pydot import graphviz_layout
 
 
 def main():
-    graph = nx.Graph()
+    graph = nx.DiGraph()
 
-    nx.draw_networkx(graph)
+    exec(sys.argv[1])
+
+    pos = graphviz_layout(graph, prog="dot")
+    nx.draw(graph.to_directed(), pos, with_labels=True, font_size=8)
     plt.show()
 
 if __name__ == "__main__":
