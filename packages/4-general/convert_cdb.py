@@ -22,12 +22,22 @@ def main():
         cdb_data = f.read()
 
     cdb_data = re.sub("/work", project_path, cdb_data)
-    cdb_data = re.sub("target/src", "src", cdb_data)
-    cdb_data = re.sub("target/x86_64/cmake/src", "src", cdb_data)
-    cdb_data = re.sub("target/tests", "tests", cdb_data)
-    cdb_data = re.sub("target/x86_64/cmake/tests", "tests", cdb_data)
-    cdb_data = re.sub("target/example", "example", cdb_data)
-    cdb_data = re.sub("target/x86_64/cmake/example", "example", cdb_data)
+    cdb_data = re.sub("/usr/bin/clang\+\+", "/usr/bin/clang++-11", cdb_data)
+    cdb_data = re.sub("-I/usr/arm-linux-gnueabihf/include/c\+\+/10/arm-linux-gnueabihf", "-I/usr/arm-linux-gnueabihf/include/c++/11/arm-linux-gnueabihf", cdb_data)
+
+    cdb_data = re.sub("-Winvalid-pch", "", cdb_data)
+    cdb_data = re.sub("-Xclang -include-pch", "", cdb_data)
+    cdb_data = re.sub("-Xclang [^ ]*.pch ", " ", cdb_data)
+
+
+
+    # cdb_data = re.sub("target/src", "src", cdb_data)
+    # cdb_data = re.sub("target/src", "src", cdb_data)
+    # cdb_data = re.sub("target/x86_64/cmake/src", "src", cdb_data)
+    # cdb_data = re.sub("target/tests", "tests", cdb_data)
+    # cdb_data = re.sub("target/x86_64/cmake/tests", "tests", cdb_data)
+    # cdb_data = re.sub("target/example", "example", cdb_data)
+    # cdb_data = re.sub("target/x86_64/cmake/example", "example", cdb_data)
 
     with open(dst_cdb_path, "w") as f:
         f.write(cdb_data)

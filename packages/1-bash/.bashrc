@@ -38,6 +38,7 @@ fi
 # set a fancy prompt (non-color, unless we know we "want" color)
 case "$TERM" in
     xterm-color|*-256color) color_prompt=yes;;
+    xterm-|*-24bit) color_prompt=yes;;
 esac
 
 # uncomment for a colored prompt, if the terminal has the capability; turned
@@ -134,6 +135,10 @@ fi
 # Append to PATH
 export PATH=$PATH:/home/udim/bin/
 export PATH=$PATH:/home/udim/.local/bin/
+export PATH=$PATH:/home/udim/.cargo/bin/
 
 # Git
 export GIT_EDITOR=vim
+
+export TERM=xterm-24bit
+. "$HOME/.cargo/env"

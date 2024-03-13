@@ -5,6 +5,7 @@
 	st = status
     co = checkout
     please = push --force-with-lease
+	adog = log --all --decorate --oneline --graph
 [commit]
 	template = /home/udim/.gitmessage.txt
 [cola]

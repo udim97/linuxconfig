@@ -33,5 +33,8 @@ emacs
 # Run emacs daemon on startup
 mkdir -p ~/.config/systemd/user/
 ln -sf `pwd`/emacs.service ~/.config/systemd/user/emacs.service
+ln -sf `pwd`/rdm.service ~/.config/systemd/user/rdm.service
 systemctl enable --user emacs
+systemctl enable --user rdm
 systemctl start --user emacs
+systemctl start --user rdm

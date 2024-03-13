@@ -1,10 +1,12 @@
 AUREUS_DIR=~/projects/aureus-software
-RG_DIR=${AUREUS_DIR}"/packages/reactiongate"
-DG_DIR=${AUREUS_DIR}"/packages/debugtiongate"
-HR_DIR=${AUREUS_DIR}"/packages/hermes"
-SPI_DIR=${AUREUS_DIR}"/packages/spi"
-UMS_DIR=${AUREUS_DIR}"/packages/ums"
-CM_DIR=${AUREUS_DIR}"/packages/cm"
+EMBEDDED_CORE=${AUREUS_DIR}"/packages/embedded/core"
+RG_DIR=${EMBEDDED_CORE}"/reactiongate"
+DG_DIR=${EMBEDDED_CORE}"/debugtiongate"
+HR_DIR=${EMBEDDED_CORE}"/hermes"
+SPI_DIR=${EMBEDDED_CORE}"/spi"
+UMS_DIR=${EMBEDDED_CORE}"/ums"
+CM_DIR=${EMBEDDED_CORE}"/cm"
+MON_DIR=${AUREUS_DIR}"/packages/full-stack/moneta"
 
 
 # Navigate
@@ -27,13 +29,19 @@ function grep_mono() {
     grep -IR --exclude-dir=target --exclude-dir=extras --exclude=compile_commands.json $@
 }
 
+function grep_core() {
+    grep -IR --exclude-dir=target --exclude-dir=build --exclude=compile_commands.json $@
+}
+
 # Projects
+alias core="cd ${EMBEDDED_CORE}"
 alias rg="cd ${RG_DIR}"
 alias dg="cd ${DG_DIR}"
 alias hr="cd ${HR_DIR}"
 alias spi="cd ${SPI_DIR}"
 alias ums="cd ${UMS_DIR}"
 alias cm="cd ${CM_DIR}"
+alias mon="cd ${MON_DIR}"
 
 # Rtags
 alias rdmEmacs="rdm --error-limit 50000"
@@ -62,6 +70,8 @@ alias fpga_62_ssh="sshpass -p raspberry ssh -o \"ServerAliveInterval 60\" pi@10.
 alias cdtmp="cd `mktemp -d`"
 alias utar="tar -zcvf"
 alias untar="tar -xzvf"
+alias tar_watch="tar -tvf"
+alias emacs="emacs -nw"
 
 # Fucntions
 function findReplace()
@@ -77,7 +87,7 @@ function findReplaceExact()
     find_pattern=$1
     replace_pattern=$2
 
-    grep -IRlw $find_pattern | xargs sed -i "s/\<$find_pattern\>/$replace_pattern/g"
+    grep -IRlw --exclude-dir=target --exclude-dir=extras --exclude=compile_commands.json $find_pattern | xargs sed -i "s/\<$find_pattern\>/$replace_pattern/g"
 }
 
 function rsp_ssh ()
@@ -88,31 +98,42 @@ function rsp_ssh ()
 
 function rsp_deploy ()
 {
-    rsp_name=$1
-    ./run-docker-compose.sh deploy -st -dd work/udim $rsp_name
+    ./run-docker.sh deploy -st -dd work/udim $@
 }
 
 function run_cdb() {
-    package_name=$1
-    arch=$2
-    package_dir=${AUREUS_DIR}/packages/${package_name}
-    convert_cdb ${AUREUS_DIR} ${package_dir}/target/${arch}/cmake/compile_commands.json ${package_dir}/compile_commands.json
+    convert_cdb ${AUREUS_DIR} ${EMBEDDED_CORE}/target/compile_commands.json ${EMBEDDED_CORE}/compile_commands.json
 }
 
 function ba() {
     ./build_arm.sh
 
-    current_workdir=`pwd`
-    package_name=`basename $current_workdir`
-    run_cdb $package_name arm
+    run_cdb
     rc -J .
 }
 
 function bl() {
     ./build_localhost.sh
 
-    current_workdir=`pwd`
-    package_name=`basename $current_workdir`
-    run_cdb $package_name x86_64
+    run_cdb
     rc -J .
+}
+
+function get_includes() {
+    file_path=$1
+    for path in `grep -o '#include ".*"' $file_path  | awk -F'"' '{print $2}' `; do
+        echo `basename $path`
+    done
+}
+
+function build_graph() {
+    for file in `find -type f`; do
+        includes=`get_includes $file`
+
+        file=`basename $file`
+
+        for i in $includes; do
+            echo "graph.add_edge(\"$file\", \"$i\")"
+        done
+    done
 }

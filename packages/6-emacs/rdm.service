@@ -1,0 +1,13 @@
+[Unit]
+Description=rdm
+Documentation=rdm
+
+[Service]
+Type=forking
+ExecStart=rdm --daemon
+ExecStop=killall rdm
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
+
